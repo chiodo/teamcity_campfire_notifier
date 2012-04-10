@@ -43,7 +43,7 @@ public class Campfire {
             HttpPost post = new HttpPost(myUrl + "/room/" + roomNumber + "/speak.xml");
 
             
-            StringEntity postBody = new StringEntity("<message><type>TextMessage</type><body>" + message + "</body></message>");
+            StringEntity postBody = new StringEntity("<message><type>PasteMessage</type><body>" + message + "</body></message>");
             post.setEntity(postBody);
             post.setHeader("Content-Type", "application/xml");
 
