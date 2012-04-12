@@ -4,8 +4,8 @@
   <info>
     <name>campfirenotifier</name>
     <display-name>Campfire Notifier</display-name>
+    <version>0.3</version>
     <vendor>Chiod0bear</vendor>
-    <version>0.2</version>
   </info>
   <deployment use-separate-classloader="true" />
 </teamcity-plugin>

@@ -35,7 +35,7 @@ public class Campfire {
         myCredentials = new UsernamePasswordCredentials(myToken, "X");
     }
 
-    public Boolean postMessage(String roomNumber, String message) {
+    public Boolean postMessage(String roomNumber, String message, String typeOfMessage) {
         try {
             DefaultHttpClient client = new DefaultHttpClient();
             client.getCredentialsProvider().setCredentials(myScope, myCredentials);
@@ -43,7 +43,7 @@ public class Campfire {
             HttpPost post = new HttpPost(myUrl + "/room/" + roomNumber + "/speak.xml");
 
             
-            StringEntity postBody = new StringEntity("<message><type>PasteMessage</type><body>" + message + "</body></message>");
+            StringEntity postBody = new StringEntity("<message><type>" + typeOfMessage + "</type><body>" + message + "</body></message>");
             post.setEntity(postBody);
             post.setHeader("Content-Type", "application/xml");
 

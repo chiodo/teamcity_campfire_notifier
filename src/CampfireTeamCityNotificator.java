@@ -9,6 +9,8 @@ import jetbrains.buildServer.serverSide.mute.MuteInfo;
 import jetbrains.buildServer.tests.TestName;
 import jetbrains.buildServer.users.NotificatorPropertyKey;
 import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.vcs.SVcsModification;
+import jetbrains.buildServer.vcs.SelectPrevBuildPolicy;
 import jetbrains.buildServer.vcs.VcsRoot;
 
 import java.util.ArrayList;
@@ -48,10 +50,10 @@ public class CampfireTeamCityNotificator implements Notificator {
 
   public void notifyBuildSuccessful(SRunningBuild sRunningBuild, Set<SUser> sUsers) {
     String message = "Build " + sRunningBuild.getFullName() + " #" +
-      sRunningBuild.getBuildNumber() + " succeeded. ";
+      sRunningBuild.getBuildNumber() + " succeeded. Praise the Holy Build Server.";
 
     for (SUser user : sUsers) {
-      notify(user, message);
+      notify(user, message, "TextMessage");
     }
   }
 
@@ -66,24 +68,30 @@ public class CampfireTeamCityNotificator implements Notificator {
     if (failedTestCount > 0) {
       List<STestRun> failedTests = stats.getFailedTests();
       for (STestRun failedTest : failedTests) {
-        message += failedTest.getTest().getName() + "\n";
+        message += "  " + failedTest.getTest().getName() + "\n";
       }
     }
 
+    List<SVcsModification> changes = sRunningBuild.getChanges(SelectPrevBuildPolicy.SINCE_LAST_SUCCESSFULLY_FINISHED_BUILD, true);
+    message += "\nCandidate Changes (" + changes.size() + "):\n";
+    for (SVcsModification change : changes) {
+      message += "  " + change.getUserName() + " : " + change.getDescription();
+    }
+
     for (SUser user : sUsers) {
-      notify(user, message);
+      notify(user, message, "PasteMessage");
     }
 
   }
 
-  private void notify(SUser user, String message) {
+  private void notify(SUser user, String message, String typeOfMessage) {
     String authToken = user.getPropertyValue(new NotificatorPropertyKey(TYPE, CAMPFIRE_AUTH_TOKEN));
     String url = user.getPropertyValue(new NotificatorPropertyKey(TYPE, CAMPFIRE_URL));
     Boolean useSsl = user.getPropertyValue(new NotificatorPropertyKey(TYPE, CAMPFIRE_USE_SSL)).trim().equalsIgnoreCase("y");
     String roomNumber = user.getPropertyValue(new NotificatorPropertyKey(TYPE, CAMPFIRE_ROOM_NUMBER));
 
     Campfire campfire = new Campfire(authToken, url, useSsl);
-    campfire.postMessage(roomNumber, message);
+    campfire.postMessage(roomNumber, message, typeOfMessage);
   }
 
   public void notifyLabelingFailed(Build build, VcsRoot vcsRoot, Throwable throwable, Set<SUser> sUsers) {
